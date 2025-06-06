@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Общие комментарии по модели:
+// Модель User описывает структуру таблицы пользователей в базе данных.
+// Каждое поле — это колонка в таблице, где хранятся определённые данные.
+// Поля id, createdAt и updateAt нужны для уникальной идентификации и управления временем создания и обновления записи.
+// email и hash — ключевые данные для аутентификации и безопасности.
+// firstName и lastName — дополнительная информация, может быть пустой.
+// Конкретно по полям:
+// id: автоинкрементируемый первичный ключ, который гарантирует уникальность каждой записи.
+// createdAt: фиксирует время создания пользователя, полезно для аудита и истории.
+// updateAt: фиксирует время последнего изменения данных пользователя (рекомендуется обновлять при изменениях).
+// email: необходим для связи с пользователем и часто служит логином.
+// hash: безопасное хранение пароля — хранится не сам пароль, а его хэш.
+// firstName и lastName: позволяют хранить имя и фамилию, при этом не обязательны, если данные не известны или не нужны.
+
+model User {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updateAt DateTime @default(now())
+  email String @unique
+  hash String
+  firstName String?
+  lastName String?
+
+bookmarks Bookmark[]
+
+  // это позволяет давать конкретное название для модели в призме
+  @@map("users")
+}
+
+model Bookmark {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updateAt DateTime @default(now())
+
+  title String
+  description String?
+  link String
+
+  userId Int
+  user User @relation(fields:[userId],references:[id])
+
+  @@map("bookmarks")
+}
